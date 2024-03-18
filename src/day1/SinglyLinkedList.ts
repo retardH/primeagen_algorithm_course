@@ -39,14 +39,8 @@ export default class SinglyLinkedList<T> {
 
     get(idx: number): T | undefined {
         let currentNode = this.head;
-        if (idx > this.length - 1 && !currentNode) {
-            return undefined;
-        }
 
-        for (let i = 0; i < this.length; i++) {
-            if (idx === i) {
-                break;
-            }
+        for (let i = 0; i < idx && currentNode; i++) {
             currentNode = currentNode?.next;
         }
 
