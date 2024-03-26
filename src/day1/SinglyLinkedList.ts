@@ -22,6 +22,7 @@ export default class SinglyLinkedList<T> {
         }
 
         this.length++;
+        newNode.next = this.head;
         this.head = newNode;
     }
 
@@ -32,59 +33,124 @@ export default class SinglyLinkedList<T> {
             this.length = 1;
             return;
         }
+
         this.length++;
         this.tail.next = newNode;
         this.tail = newNode;
     }
 
-    get(idx: number): T | undefined {
+    private getNodeByIdx(idx: number): Node<T> | undefined {
         let currentNode = this.head;
 
-        for (let i = 0; i < idx && currentNode; i++) {
+        for (let i = 0; i < idx && currentNode; ++i) {
             currentNode = currentNode?.next;
         }
 
-        return currentNode?.value;
+        return currentNode;
+    }
+
+    get(idx: number): T | undefined {
+        const out = this.getNodeByIdx(idx);
+        return out?.value;
     }
 
     insertAt(item: T, idx: number): void {
-        let node = { value: item } as Node<T>;
-        let currentNode = this.head;
-        if (idx >= this.length) {
+        if (idx > this.length) {
             return;
         }
 
-        for (let i = 0; i < this.length; i++) {
-            if (idx === i) {
-                break;
-            }
-            currentNode = currentNode?.next;
+        if (idx === 0) {
+            this.prepend(item);
         }
 
+        if (idx === this.length) {
+            this.append(item);
+        }
+
+        let currentNode = this.getNodeByIdx(idx);
+        let node = { value: item } as Node<T>;
         node.next = currentNode;
         currentNode = node;
     }
 
     remove(item: T): T | undefined {
-        return undefined;
+        let curr = this.head;
+        let prevCurrNode: Node<T> | undefined;
+        for (let i = 0; i < this.length && curr; ++i) {
+            if (curr.value === item) {
+                break;
+            }
+            prevCurrNode = curr;
+            curr = curr.next;
+        }
+
+        if (!curr) {
+            return undefined;
+        }
+
+        this.length--;
+        if (this.length === 0) {
+            const out = this.head?.value;
+            this.head = this.tail = undefined;
+            this.length = 0;
+            return out;
+        }
+
+        let out = curr.value;
+        if (curr === this.head) {
+            this.head = curr.next;
+            curr = undefined;
+            return out;
+        }
+
+        if (curr === this.tail) {
+            this.tail = prevCurrNode;
+            curr = undefined;
+            return out;
+        }
+
+        (prevCurrNode as Node<T>).next = curr.next;
+        curr = undefined;
+        return out;
     }
 
     removeAt(idx: number): T | undefined {
-        let currentNode = this.head;
         if (idx >= this.length) {
-            return;
+            return undefined;
         }
 
-        for (let i = 0; i < this.length; i++) {
-            if (idx === i) {
-                break;
-            }
-            currentNode = currentNode?.next;
+        let curr = this.head;
+        let prevCurrNode: Node<T> | undefined;
+        for (let i = 0; i < idx && curr; ++i) {
+            prevCurrNode = curr;
+            curr = curr.next;
         }
 
-        let removeNode = currentNode;
-        currentNode = currentNode?.next;
+        if (!curr) {
+            return undefined;
+        }
 
-        return currentNode?.value;
+        this.length--;
+        if (this.length === 0) {
+            let out = this.head?.value;
+            this.head = this.tail = undefined;
+            this.length = 0;
+            return out;
+        }
+
+        if (curr === this.head) {
+            this.head = curr?.next;
+            return curr?.value;
+        }
+
+        if (curr === this.tail) {
+            this.tail = prevCurrNode;
+            return curr?.value;
+        }
+
+        let out = curr?.value;
+        (prevCurrNode as Node<T>).next = curr?.next;
+        curr = undefined;
+        return out;
     }
 }
